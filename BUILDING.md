@@ -18,27 +18,52 @@ The easiest way to build VoiceInk is using the included Makefile, which automate
 
 ```bash
 # Clone the repository
-git clone https://github.com/Beingpax/VoiceInk.git
+git clone https://github.com/flowerornament/VoiceInk.git
 cd VoiceInk
 
-# Build everything (recommended for first-time setup)
-make all
-
-# Or for development (build and run)
+# For development (build Debug version and run)
 make dev
+
+# To install for personal use
+make install
 ```
+
+After running `make install`, VoiceInk will be installed to `~/Applications/VoiceInk.app` and you can launch it from there or from Spotlight.
 
 ### Available Makefile Commands
 
+#### Build Commands
 - `make check` or `make healthcheck` - Verify all required tools are installed
 - `make whisper` - Clone and build whisper.cpp XCFramework automatically
 - `make setup` - Prepare the whisper framework for linking
-- `make build` - Build the VoiceInk Xcode project
-- `make run` - Launch the built VoiceInk app
-- `make dev` - Build and run (ideal for development workflow)
+- `make build` - Build VoiceInk in Debug configuration (default)
+- `make release` - Build VoiceInk in Release configuration (optimized for production use)
+- `make run` - Launch the built VoiceInk app from the build directory
+- `make dev` - Build (Debug) and run the app (ideal for development workflow)
 - `make all` - Complete build process (default)
-- `make clean` - Remove build artifacts and dependencies
-- `make help` - Show all available commands
+
+#### Installation Commands
+- `make install` - Build Release version and install to `~/Applications`
+- `make uninstall` - Remove VoiceInk from `~/Applications`
+
+#### Cleanup Commands
+- `make clean` - Remove build directory
+- `make clean-all` - Remove build directory and all dependencies
+
+#### Other Commands
+- `make help` - Show all available commands with descriptions
+
+### Configuration Options
+
+You can customize the build with these variables:
+
+```bash
+# Build in Release mode
+make build CONFIGURATION=Release
+
+# Install to a different directory (e.g., /Applications for system-wide install)
+make install INSTALL_DIR=/Applications
+```
 
 ### How the Makefile Helps
 
@@ -71,7 +96,7 @@ This will create the XCFramework at `build-apple/whisper.xcframework`.
 
 1. Clone the VoiceInk repository:
 ```bash
-git clone https://github.com/Beingpax/VoiceInk.git
+git clone https://github.com/flowerornament/VoiceInk.git
 cd VoiceInk
 ```
 

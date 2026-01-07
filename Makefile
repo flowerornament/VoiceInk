@@ -3,7 +3,13 @@ DEPS_DIR := $(CURDIR)/../VoiceInk-Dependencies
 WHISPER_CPP_DIR := $(DEPS_DIR)/whisper.cpp
 FRAMEWORK_PATH := $(WHISPER_CPP_DIR)/build-apple/whisper.xcframework
 
-.PHONY: all clean whisper setup build check healthcheck help dev run
+# Build configuration (Debug or Release)
+CONFIGURATION ?= Debug
+BUILD_DIR := $(CURDIR)/build
+APP_NAME := VoiceInk.app
+INSTALL_DIR ?= $(HOME)/Applications
+
+.PHONY: all clean whisper setup build check healthcheck help dev run release install uninstall
 
 # Default target
 all: check build
@@ -41,35 +47,85 @@ setup: whisper
 	@echo "Please ensure your Xcode project references the framework from this new location."
 
 build: setup
-	xcodebuild -project VoiceInk.xcodeproj -scheme VoiceInk -configuration Debug CODE_SIGN_IDENTITY="" build
+	@echo "Building VoiceInk ($(CONFIGURATION))..."
+	@xcodebuild -project VoiceInk.xcodeproj \
+		-scheme VoiceInk \
+		-configuration $(CONFIGURATION) \
+		-derivedDataPath $(BUILD_DIR) \
+		CODE_SIGN_IDENTITY="" \
+		CODE_SIGNING_REQUIRED=NO \
+		CODE_SIGNING_ALLOWED=NO \
+		build
+	@echo "Build complete. App is at: $(BUILD_DIR)/Build/Products/$(CONFIGURATION)/$(APP_NAME)"
 
 # Run application
 run:
-	@echo "Looking for VoiceInk.app..."
-	@APP_PATH=$$(find "$$HOME/Library/Developer/Xcode/DerivedData" -name "VoiceInk.app" -type d | head -1) && \
-	if [ -n "$$APP_PATH" ]; then \
-		echo "Found app at: $$APP_PATH"; \
-		open "$$APP_PATH"; \
+	@echo "Running VoiceInk from build directory..."
+	@if [ -d "$(BUILD_DIR)/Build/Products/$(CONFIGURATION)/$(APP_NAME)" ]; then \
+		open "$(BUILD_DIR)/Build/Products/$(CONFIGURATION)/$(APP_NAME)"; \
 	else \
-		echo "VoiceInk.app not found. Please run 'make build' first."; \
+		echo "VoiceInk.app not found at $(BUILD_DIR)/Build/Products/$(CONFIGURATION)/$(APP_NAME)"; \
+		echo "Please run 'make build' first."; \
 		exit 1; \
+	fi
+
+# Build Release version
+release:
+	@$(MAKE) build CONFIGURATION=Release
+
+# Install to Applications directory
+install: release
+	@echo "Installing VoiceInk to $(INSTALL_DIR)..."
+	@mkdir -p $(INSTALL_DIR)
+	@if [ -d "$(BUILD_DIR)/Build/Products/Release/$(APP_NAME)" ]; then \
+		rm -rf "$(INSTALL_DIR)/$(APP_NAME)"; \
+		cp -R "$(BUILD_DIR)/Build/Products/Release/$(APP_NAME)" "$(INSTALL_DIR)/"; \
+		echo "✓ VoiceInk installed to $(INSTALL_DIR)/$(APP_NAME)"; \
+		echo "You can now run it from Applications or use 'open $(INSTALL_DIR)/$(APP_NAME)'"; \
+	else \
+		echo "Error: Release build not found. Run 'make release' first."; \
+		exit 1; \
+	fi
+
+# Uninstall from Applications directory
+uninstall:
+	@echo "Uninstalling VoiceInk from $(INSTALL_DIR)..."
+	@if [ -d "$(INSTALL_DIR)/$(APP_NAME)" ]; then \
+		rm -rf "$(INSTALL_DIR)/$(APP_NAME)"; \
+		echo "✓ VoiceInk uninstalled"; \
+	else \
+		echo "VoiceInk not found at $(INSTALL_DIR)/$(APP_NAME)"; \
 	fi
 
 # Cleanup
 clean:
 	@echo "Cleaning build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@echo "Build directory cleaned"
+
+# Clean everything including dependencies
+clean-all: clean
+	@echo "Cleaning dependencies..."
 	@rm -rf $(DEPS_DIR)
-	@echo "Clean complete"
+	@echo "Complete clean finished"
 
 # Help
 help:
 	@echo "Available targets:"
 	@echo "  check/healthcheck  Check if required CLI tools are installed"
 	@echo "  whisper            Clone and build whisper.cpp XCFramework"
-	@echo "  setup              Copy whisper XCFramework to VoiceInk project"
-	@echo "  build              Build the VoiceInk Xcode project"
-	@echo "  run                Launch the built VoiceInk app"
-	@echo "  dev                Build and run the app (for development)"
+	@echo "  setup              Ensure whisper XCFramework is ready"
+	@echo "  build              Build VoiceInk (Debug by default, set CONFIGURATION=Release for release)"
+	@echo "  release            Build VoiceInk in Release configuration"
+	@echo "  run                Launch the built VoiceInk app from build directory"
+	@echo "  install            Build Release and install to $(INSTALL_DIR)"
+	@echo "  uninstall          Remove VoiceInk from $(INSTALL_DIR)"
+	@echo "  dev                Build (Debug) and run the app (for development)"
 	@echo "  all                Run full build process (default)"
-	@echo "  clean              Remove build artifacts"
+	@echo "  clean              Remove build directory"
+	@echo "  clean-all          Remove build directory and dependencies"
 	@echo "  help               Show this help message"
+	@echo ""
+	@echo "Variables:"
+	@echo "  CONFIGURATION      Build configuration (Debug or Release, default: Debug)"
+	@echo "  INSTALL_DIR        Installation directory (default: $(HOME)/Applications)"
