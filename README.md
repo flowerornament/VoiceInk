@@ -17,12 +17,6 @@ This is a fork of [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk) with
 - **AI Enhancement**: Optional post-processing with external AI providers
 - **AI Assistant Mode**: Voice-driven conversational assistant
 
-## Requirements
-
-- macOS 14.0 or later
-- Xcode Command Line Tools
-- Git
-
 ## Building from Source
 
 ### Prerequisites
