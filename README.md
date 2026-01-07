@@ -25,14 +25,29 @@ This is a fork of [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk) with
 
 ## Building from Source
 
-See [BUILDING.md](BUILDING.md) for detailed build instructions.
+### Prerequisites
 
-Quick start:
+- macOS 14.0 or later
+- Xcode Command Line Tools: `xcode-select --install`
+- Git
+
+### Dependencies
+
+The Makefile automatically manages dependencies, but you can also install via Homebrew:
+
+```bash
+brew install --cask voiceink
+```
+
+Or build from source:
+
 ```bash
 make all    # Download dependencies, build framework, and run
 make dev    # Build and run for development
 make clean  # Remove build artifacts
 ```
+
+See [BUILDING.md](BUILDING.md) for detailed build instructions.
 
 ## Documentation
 
