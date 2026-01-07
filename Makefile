@@ -1,5 +1,5 @@
-# Define a directory for dependencies in the user's home folder
-DEPS_DIR := $(HOME)/VoiceInk-Dependencies
+# Define a directory for dependencies alongside the repository
+DEPS_DIR := $(CURDIR)/../VoiceInk-Dependencies
 WHISPER_CPP_DIR := $(DEPS_DIR)/whisper.cpp
 FRAMEWORK_PATH := $(WHISPER_CPP_DIR)/build-apple/whisper.xcframework
 

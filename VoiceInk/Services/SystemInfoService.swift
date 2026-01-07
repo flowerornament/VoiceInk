@@ -4,6 +4,7 @@ import AVFoundation
 
 class SystemInfoService {
     static let shared = SystemInfoService()
+    private let userDefaults = UserDefaults.standard
 
     private init() {}
 
@@ -188,16 +189,11 @@ class SystemInfoService {
     }
 
     private func getLicenseStatus() -> String {
-        let licenseManager = LicenseManager.shared
-
-        // Check for existing license key and activation
-        if licenseManager.licenseKey != nil {
-            if licenseManager.activationId != nil || !UserDefaults.standard.bool(forKey: "VoiceInkLicenseRequiresActivation") {
-                return "Licensed (Pro)"
-            }
+        if userDefaults.licenseKey != nil {
+            return "Licensed (Key stored)"
         }
 
-        return "Not Licensed"
+        return "Licensed (Open Source Build)"
     }
 
     private func getCurrentLanguage() -> String {

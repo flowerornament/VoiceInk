@@ -42,7 +42,7 @@ My goal is to make it **the most efficient and privacy-focused voice-to-text sol
 ## Get Started
 
 ### Download
-Get the latest version with a free trial from [tryvoiceink.com](https://tryvoiceink.com). Your purchase helps me work on VoiceInk full-time and continuously improve it with new features and updates.
+Get the latest version from [tryvoiceink.com](https://tryvoiceink.com). Your purchase helps me work on VoiceInk full-time and continuously improve it with new features and updates.
 
 #### Homebrew
 Alternatively, you can install VoiceInk via `brew`:
