@@ -127,15 +127,9 @@ bd sync               # Sync with git
 
 **Remotes:**
 - `origin`: Your fork (flowerornament/VoiceInk)
-- `upstream`: Original repo (Beingpax/VoiceInk)
+- `upstream`: Original repo (Beingpax/VoiceInk) - kept for reference only
 
-**Syncing with upstream:**
-```bash
-git fetch upstream
-git merge upstream/main
-# Resolve conflicts if any
-git push origin main
-```
+**Note**: This is a **standalone fork**. We do NOT sync with upstream. The `upstream` remote exists for reference but changes are not merged from the original repository.
 
 ## Coding Conventions
 
@@ -212,19 +206,15 @@ git push origin main
 
 ## Fork-Specific Notes
 
-This fork differs from upstream:
+This is a **standalone fork** - we do NOT sync with upstream.
+
+Key differences from original VoiceInk:
 - **No licensing/trial system**: App always reports as licensed
 - **Open source focus**: Removed commercial promotional content
 - **Beads integration**: Added AI-native issue tracking
 - **Relative dependencies**: Uses `../VoiceInk-Dependencies/` instead of `~/VoiceInk-Dependencies`
 
-When syncing with upstream, expect conflicts in:
-- `LicenseViewModel.swift`
-- `UserDefaultsManager.swift`
-- `SystemInfoService.swift`
-- Promotional UI components
-
-Resolve by keeping our simplified "always licensed" version.
+The `upstream` remote is kept for reference purposes only.
 
 ---
 
