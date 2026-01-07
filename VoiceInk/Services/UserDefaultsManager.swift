@@ -4,6 +4,7 @@ extension UserDefaults {
     enum Keys {
         static let aiProviderApiKey = "VoiceInkAIProviderKey"
         static let licenseKey = "VoiceInkLicense"
+        static let activationId = "VoiceInkActivationId"
         static let audioInputMode = "audioInputMode"
         static let selectedAudioDeviceUID = "selectedAudioDeviceUID"
         static let prioritizedDevices = "prioritizedDevices"
@@ -20,6 +21,12 @@ extension UserDefaults {
     var licenseKey: String? {
         get { string(forKey: Keys.licenseKey) }
         set { setValue(newValue, forKey: Keys.licenseKey) }
+    }
+
+    // MARK: - Activation ID
+    var activationId: String? {
+        get { string(forKey: Keys.activationId) }
+        set { setValue(newValue, forKey: Keys.activationId) }
     }
 
     // MARK: - Audio Input Mode
