@@ -25,23 +25,45 @@ This is a fork of [Beingpax/VoiceInk](https://github.com/Beingpax/VoiceInk) with
 - Xcode Command Line Tools: `xcode-select --install`
 - Git
 
-### Dependencies
+### Quick Start
 
-The Makefile automatically manages dependencies, but you can also install via Homebrew:
+Clone and build in one command:
+
+```bash
+git clone https://github.com/flowerornament/VoiceInk.git
+cd VoiceInk
+make install
+```
+
+This will download dependencies, build the Release version, and install VoiceInk to `~/Applications/VoiceInk.app`.
+
+### Build Commands
+
+```bash
+# For personal use (installs to ~/Applications)
+make install
+
+# For development (builds Debug version and runs)
+make dev
+
+# Build only (no install)
+make build              # Debug build
+make release            # Release build
+
+# Cleanup
+make clean              # Remove build directory
+make clean-all          # Remove build directory and dependencies
+```
+
+### Alternative Installation
+
+You can also install the upstream version via Homebrew:
 
 ```bash
 brew install --cask voiceink
 ```
 
-Or build from source:
-
-```bash
-make all    # Download dependencies, build framework, and run
-make dev    # Build and run for development
-make clean  # Remove build artifacts
-```
-
-See [BUILDING.md](BUILDING.md) for detailed build instructions.
+See [BUILDING.md](BUILDING.md) for detailed build instructions and configuration options.
 
 ## Documentation
 

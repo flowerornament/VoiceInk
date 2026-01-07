@@ -96,17 +96,36 @@ Automatically applies custom settings based on:
 
 ### Building the Project
 
-See [BUILDING.md](BUILDING.md) for detailed instructions. Quick start:
+The project uses a Makefile-based build system that works entirely from the command line without opening Xcode.
 
+**Quick start:**
 ```bash
-make all              # Full build (downloads whisper.cpp, builds framework, runs app)
-make dev              # Build and run for development
-make clean            # Remove build artifacts
+# For personal use (installs to ~/Applications)
+make install
+
+# For development (Debug build and run)
+make dev
+
+# Build only
+make build              # Debug configuration
+make release            # Release configuration (optimized)
+
+# Cleanup
+make clean              # Remove build directory
+make clean-all          # Remove build directory and dependencies
 ```
+
+**Build output:**
+- Debug builds: `./build/Build/Products/Debug/VoiceInk.app`
+- Release builds: `./build/Build/Products/Release/VoiceInk.app`
+- Install location: `~/Applications/VoiceInk.app` (or custom via `INSTALL_DIR`)
 
 **Dependencies:**
 - Whisper.xcframework (built automatically by Makefile)
 - Managed in `../VoiceInk-Dependencies/` (relative to repo root)
+- All Swift packages fetched automatically during build
+
+See [BUILDING.md](BUILDING.md) for detailed instructions and configuration options.
 
 ### Beads Issue Tracking
 
@@ -188,14 +207,34 @@ bd sync               # Sync with git
 ## Troubleshooting
 
 **Build Errors:**
-1. Run `make clean && make all`
-2. Verify Xcode Command Line Tools installed: `xcode-select --install`
-3. Check whisper.xcframework exists at `../VoiceInk-Dependencies/whisper.cpp/build-apple/whisper.xcframework`
+
+1. **Clean and rebuild:**
+   ```bash
+   make clean-all && make build
+   ```
+
+2. **Verify prerequisites:**
+   ```bash
+   make check
+   xcode-select --install  # If xcodebuild missing
+   ```
+
+3. **Check whisper framework:**
+   ```bash
+   ls ../VoiceInk-Dependencies/whisper.cpp/build-apple/whisper.xcframework
+   ```
+   If missing, run `make whisper` to build it.
+
+4. **Common compilation errors:**
+   - Missing UserDefaults properties: Check `UserDefaultsManager.swift` has all required properties
+   - Code signing errors: Builds use `CODE_SIGN_IDENTITY=""` to disable signing
+   - Swift package issues: Delete `build/` and rebuild to refetch packages
 
 **Runtime Issues:**
 - Check Console.app for VoiceInk logs (subsystem: `com.prakashjoshipax.voiceink`)
-- Verify Accessibility permission granted in System Settings
+- Verify Accessibility permission granted in System Settings → Privacy & Security
 - Ensure microphone permission granted
+- If app crashes on launch, check `~/Library/Logs/DiagnosticReports/` for crash logs
 
 ## Related Documentation
 
