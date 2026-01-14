@@ -1,0 +1,15 @@
+# Fork Customizations
+# Review these files after pulling from upstream to ensure customizations aren't lost.
+# See beads issue VoiceInk-q3c for details.
+
+## Recording Popup UI (2026-01-14)
+VoiceInk/Views/Recorder/MiniRecorderView.swift
+VoiceInk/Views/Recorder/MiniRecorderPanel.swift
+VoiceInk/Views/Recorder/MiniWindowManager.swift
+VoiceInk/Views/Recorder/AudioVisualizerView.swift
+
+### Summary of changes:
+# - MiniRecorderView: Removed buttons, solid black background, subtle white border (25% opacity)
+# - MiniRecorderPanel: 115x42 dimensions, no shadow
+# - MiniWindowManager: Removed enhancementService environment object injection
+# - AudioVisualizerView: Noise gate (threshold 0.15), pure white bars, 1px corner radius, maxHeight 32

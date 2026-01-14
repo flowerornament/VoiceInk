@@ -9,7 +9,8 @@ struct AudioVisualizer: View {
     private let barWidth: CGFloat = 3
     private let barSpacing: CGFloat = 2
     private let minHeight: CGFloat = 4
-    private let maxHeight: CGFloat = 28
+    private let maxHeight: CGFloat = 32
+    private let cornerRadius: CGFloat = 1
 
     private let phases: [Double]
 
@@ -28,8 +29,8 @@ struct AudioVisualizer: View {
     var body: some View {
         HStack(spacing: barSpacing) {
             ForEach(0..<barCount, id: \.self) { index in
-                RoundedRectangle(cornerRadius: barWidth / 2)
-                    .fill(color.opacity(0.85))
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(color)
                     .frame(width: barWidth, height: heights[index])
             }
         }
@@ -45,8 +46,15 @@ struct AudioVisualizer: View {
         let time = Date().timeIntervalSince1970
         let amplitude = max(0, min(1, level))
 
-        // Boost lower levels for better visibility
-        let boosted = pow(amplitude, 0.7)
+        // Soft noise gate - smoothly filter out mic noise
+        let noiseFloor: Double = 0.15
+        let gateWidth: Double = 0.08
+        let t = max(0, min(1, (amplitude - noiseFloor) / gateWidth))
+        let gateMultiplier = t * t * (3 - 2 * t)  // smoothstep curve
+        let filtered = amplitude * gateMultiplier
+
+        // Boost for visibility of real signals
+        let boosted = pow(filtered, 0.7)
 
         withAnimation(.easeOut(duration: 0.08)) {
             for i in 0..<barCount {
@@ -73,13 +81,14 @@ struct StaticVisualizer: View {
     private let barWidth: CGFloat = 3
     private let staticHeight: CGFloat = 4
     private let barSpacing: CGFloat = 2
+    private let cornerRadius: CGFloat = 1
     let color: Color
 
     var body: some View {
         HStack(spacing: barSpacing) {
             ForEach(0..<barCount, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: barWidth / 2)
-                    .fill(color.opacity(0.5))
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(color)
                     .frame(width: barWidth, height: staticHeight)
             }
         }
