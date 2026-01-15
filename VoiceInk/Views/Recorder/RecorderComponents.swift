@@ -304,24 +304,20 @@ struct RecorderStatusDisplay: View {
         Group {
             if currentState == .enhancing {
                 ProcessingStatusDisplay(mode: .enhancing, color: .white)
-                    .transition(.opacity)
             } else if currentState == .transcribing {
                 ProcessingStatusDisplay(mode: .transcribing, color: .white)
-                    .transition(.opacity)
             } else if currentState == .recording {
                 AudioVisualizer(
                     audioMeter: audioMeter,
                     color: .white,
-                    isActive: currentState == .recording
+                    isActive: true
                 )
                 .scaleEffect(y: menuBarHeight != nil ? min(1.0, (menuBarHeight! - 8) / 25) : 1.0, anchor: .center)
-                .transition(.opacity)
             } else {
                 StaticVisualizer(color: .white)
                     .scaleEffect(y: menuBarHeight != nil ? min(1.0, (menuBarHeight! - 8) / 25) : 1.0, anchor: .center)
-                    .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: currentState)
+        .frame(height: 28)
     }
 }

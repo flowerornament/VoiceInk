@@ -9,7 +9,8 @@ final class APIKeyManager {
     private let keychain = KeychainService.shared
     private let userDefaults = UserDefaults.standard
 
-    private let migrationCompletedKey = "APIKeyMigrationToKeychainCompleted_v2"
+    // Bumped version to v3 to retry migration after keychain fix for unsigned apps
+    private let migrationCompletedKey = "APIKeyMigrationToKeychainCompleted_v3"
 
     /// Provider to Keychain identifier mapping (iOS compatible for iCloud sync).
     private static let providerToKeychainKey: [String: String] = [

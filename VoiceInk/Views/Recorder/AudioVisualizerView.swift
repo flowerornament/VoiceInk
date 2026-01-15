@@ -8,13 +8,14 @@ struct AudioVisualizer: View {
     private let barCount = 15
     private let barWidth: CGFloat = 3
     private let barSpacing: CGFloat = 2
-    private let minHeight: CGFloat = 4
-    private let maxHeight: CGFloat = 32
-    private let cornerRadius: CGFloat = 1
+    private let minHeight: CGFloat = 3
+    private let maxHeight: CGFloat = 28
 
     private let phases: [Double]
 
     @State private var heights: [CGFloat]
+    @State private var envelope: Double = 0
+    @State private var gateOpen: Bool = false
 
     init(audioMeter: AudioMeter, color: Color, isActive: Bool) {
         self.audioMeter = audioMeter
@@ -29,16 +30,16 @@ struct AudioVisualizer: View {
     var body: some View {
         HStack(spacing: barSpacing) {
             ForEach(0..<barCount, id: \.self) { index in
-                RoundedRectangle(cornerRadius: cornerRadius)
+                RoundedRectangle(cornerRadius: barWidth / 2)
                     .fill(color)
                     .frame(width: barWidth, height: heights[index])
             }
         }
         .onChange(of: audioMeter) { _, newValue in
-            updateWave(level: isActive ? newValue.averagePower : 0)
-        }
-        .onChange(of: isActive) { _, active in
-            if !active { resetWave() }
+            // Only update when active - completely stop processing when fading out
+            // This prevents frame drops during opacity transitions
+            guard isActive else { return }
+            updateWave(level: newValue.averagePower)
         }
     }
 
@@ -46,48 +47,57 @@ struct AudioVisualizer: View {
         let time = Date().timeIntervalSince1970
         let amplitude = max(0, min(1, level))
 
-        // Soft noise gate - smoothly filter out mic noise
-        let noiseFloor: Double = 0.15
-        let gateWidth: Double = 0.08
-        let t = max(0, min(1, (amplitude - noiseFloor) / gateWidth))
-        let gateMultiplier = t * t * (3 - 2 * t)  // smoothstep curve
-        let filtered = amplitude * gateMultiplier
+        // Gate with hysteresis - different open/close thresholds prevent flicker
+        let openThreshold: Double = 0.25   // Must exceed this to open
+        let closeThreshold: Double = 0.12  // Must fall below this to close
 
-        // Boost for visibility of real signals
-        let boosted = pow(filtered, 0.7)
+        // Update gate state with hysteresis
+        if amplitude > openThreshold {
+            gateOpen = true
+        } else if amplitude < closeThreshold {
+            gateOpen = false
+        }
+        // Between thresholds: maintain current state
 
-        withAnimation(.easeOut(duration: 0.08)) {
-            for i in 0..<barCount {
-                let wave = sin(time * 8 + phases[i]) * 0.5 + 0.5
-                let centerDistance = abs(Double(i) - Double(barCount) / 2) / Double(barCount / 2)
-                let centerBoost = 1.0 - (centerDistance * 0.4)
+        let gated: Double = gateOpen ? amplitude : 0
 
-                let height = minHeight + CGFloat(boosted * wave * centerBoost) * (maxHeight - minHeight)
-                heights[i] = max(minHeight, height)
-            }
+        // Envelope follower on gated signal - graceful fade without noise
+        let attackCoef: Double = 0.6    // Fast attack
+        let releaseCoef: Double = 0.6   // Very quick release
+
+        if gated > envelope {
+            envelope = envelope + (gated - envelope) * attackCoef
+        } else {
+            envelope = envelope + (gated - envelope) * releaseCoef
+        }
+
+        // Boost for visibility
+        let boosted = pow(envelope, 0.7)
+
+        for i in 0..<barCount {
+            let wave = sin(time * 8 + phases[i]) * 0.5 + 0.5
+            let centerDistance = abs(Double(i) - Double(barCount) / 2) / Double(barCount / 2)
+            let centerBoost = 1.0 - (centerDistance * 0.4)
+
+            let height = minHeight + CGFloat(boosted * wave * centerBoost) * (maxHeight - minHeight)
+            heights[i] = max(minHeight, height)
         }
     }
 
-    private func resetWave() {
-        withAnimation(.easeOut(duration: 0.2)) {
-            heights = Array(repeating: minHeight, count: barCount)
-        }
-    }
 }
 
 struct StaticVisualizer: View {
     // Match AudioVisualizer dimensions
     private let barCount = 15
     private let barWidth: CGFloat = 3
-    private let staticHeight: CGFloat = 4
+    private let staticHeight: CGFloat = 3
     private let barSpacing: CGFloat = 2
-    private let cornerRadius: CGFloat = 1
     let color: Color
 
     var body: some View {
         HStack(spacing: barSpacing) {
             ForEach(0..<barCount, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: cornerRadius)
+                RoundedRectangle(cornerRadius: barWidth / 2)
                     .fill(color)
                     .frame(width: barWidth, height: staticHeight)
             }

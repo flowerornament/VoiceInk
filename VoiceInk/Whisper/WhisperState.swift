@@ -141,6 +141,12 @@ class WhisperState: NSObject, ObservableObject {
     func toggleRecord(powerModeId: UUID? = nil) async {
         if recordingState == .recording {
             await recorder.stopRecording()
+
+            // Change state immediately after stopping - don't leave UI frozen on last audio frame
+            await MainActor.run {
+                recordingState = .transcribing
+            }
+
             if let recordedFile {
                 if !shouldCancelRecording {
                     let audioAsset = AVURLAsset(url: recordedFile)
@@ -384,27 +390,31 @@ class WhisperState: NSObject, ObservableObject {
 
         if await checkCancellationAndCleanup() { return }
 
-        if let textToPaste = finalPastedText, transcription.transcriptionStatus == TranscriptionStatus.completed.rawValue {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                CursorPaster.pasteAtCursor(textToPaste + " ")
-
-                let powerMode = PowerModeManager.shared
-                if let activeConfig = powerMode.currentActiveConfiguration, activeConfig.isAutoSendEnabled {
-                    // Slight delay to ensure the paste operation completes
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        CursorPaster.pressEnter()
-                    }
-                }
-            }
-        }
-
+        // Restore prompt settings before dismissing
         if let result = promptDetectionResult,
            let enhancementService = enhancementService,
            result.shouldEnableAI {
             await promptDetectionService.restoreOriginalSettings(result, to: enhancementService)
         }
 
+        // Dismiss UI first, then paste text (so UI doesn't show stale state during paste delays)
         await self.dismissMiniRecorder()
+
+        // Paste text after UI is dismissed (inline async, not fire-and-forget)
+        if let textToPaste = finalPastedText, transcription.transcriptionStatus == TranscriptionStatus.completed.rawValue {
+            await MainActor.run {
+                CursorPaster.pasteAtCursor(textToPaste + " ")
+            }
+
+            let powerMode = PowerModeManager.shared
+            if let activeConfig = powerMode.currentActiveConfiguration, activeConfig.isAutoSendEnabled {
+                // Wait for paste to complete before pressing Enter
+                try? await Task.sleep(nanoseconds: 150_000_000)  // 150ms
+                await MainActor.run {
+                    CursorPaster.pressEnter()
+                }
+            }
+        }
 
         shouldCancelRecording = false
     }

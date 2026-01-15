@@ -3,8 +3,16 @@ import SwiftData
 
 struct DictionarySettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var selectedSection: DictionarySection = .replacements
+    @AppStorage("dictionarySelectedSection") private var selectedSectionRaw: String = DictionarySection.replacements.rawValue
     let whisperPrompt: WhisperPrompt
+
+    private var selectedSection: DictionarySection {
+        get { DictionarySection(rawValue: selectedSectionRaw) ?? .replacements }
+    }
+
+    private func setSelectedSection(_ section: DictionarySection) {
+        selectedSectionRaw = section.rawValue
+    }
     
     enum DictionarySection: String, CaseIterable {
         case replacements = "Word Replacements"
@@ -96,7 +104,7 @@ struct DictionarySettingsView: View {
                     SectionCard(
                         section: section,
                         isSelected: selectedSection == section,
-                        action: { selectedSection = section }
+                        action: { setSelectedSection(section) }
                     )
                 }
             }

@@ -98,18 +98,16 @@ final class KeychainService {
     // MARK: - Private Helpers
 
     /// Creates base Keychain query dictionary.
+    /// Note: kSecUseDataProtectionKeychain and kSecAttrSynchronizable require code signing.
+    /// For unsigned builds, we use basic keychain access without these features.
     private func baseQuery(forKey key: String, syncable: Bool) -> [String: Any] {
-        var query: [String: Any] = [
+        // Basic keychain query - works with unsigned apps
+        // Note: iCloud sync (kSecAttrSynchronizable) and data protection keychain
+        // (kSecUseDataProtectionKeychain) are disabled because they require code signing
+        return [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key,
-            kSecUseDataProtectionKeychain as String: true
+            kSecAttrAccount as String: key
         ]
-
-        if syncable {
-            query[kSecAttrSynchronizable as String] = kCFBooleanTrue
-        }
-
-        return query
     }
 }
